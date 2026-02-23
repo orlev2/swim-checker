@@ -466,7 +466,7 @@
   (function () {
     var HOUR_START = 6;
     var HOUR_END   = 22;
-    var HOUR_PX    = 60;
+    var HOUR_PX    = 44;
     var GUTTER_PX  = 46;
     var TOTAL_H    = (HOUR_END - HOUR_START) * HOUR_PX;
 
@@ -705,15 +705,6 @@
         + '<div class="cal-body">' + gutter + poolsDiv + '</div>'
         + '</div>';
 
-      // Scroll the now-line into view
-      if (nowPx !== null) {
-        var nowEl = document.querySelector(".cal-now");
-        if (nowEl) {
-          setTimeout(function () {
-            nowEl.scrollIntoView({ behavior: "smooth", block: "center" });
-          }, 80);
-        }
-      }
     }
 
     /* ── Cards ── */
