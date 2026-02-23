@@ -7,27 +7,27 @@
   <style>
     /* ─── Design tokens ─── */
     :root {
-      --bg:           #eef2f9;
-      --surface:      #ffffff;
-      --surface-2:    #f5f8fc;
-      --border:       #e2e8f0;
-      --border-2:     #cdd5e0;
-      --text-1:       #0f172a;
-      --text-2:       #475569;
-      --text-3:       #94a3b8;
-      --blue:         #1d4ed8;
-      --blue-pale:    #dbeafe;
-      --green:        #059669;
-      --green-pale:   #d1fae5;
-      --amber:        #b45309;
-      --amber-pale:   #fef3c7;
-      --red:          #dc2626;
-      --red-pale:     #fee2e2;
+      --bg:           #050f1c;
+      --surface:      #0f2440;
+      --surface-2:    #152e4e;
+      --border:       #163450;
+      --border-2:     #1f4a6e;
+      --text-1:       #c8e0f0;
+      --text-2:       #6098b8;
+      --text-3:       #2e5a75;
+      --blue:         #00c8e0;
+      --blue-pale:    #012830;
+      --green:        #00c9a7;
+      --green-pale:   #012720;
+      --amber:        #f0a830;
+      --amber-pale:   #271400;
+      --red:          #e06060;
+      --red-pale:     #290808;
       --r-lg:         14px;
       --r:            10px;
       --r-sm:         7px;
-      --shadow-sm:    0 1px 2px rgba(15,23,42,.06), 0 1px 3px rgba(15,23,42,.04);
-      --shadow:       0 4px 12px rgba(15,23,42,.08), 0 2px 4px rgba(15,23,42,.04);
+      --shadow-sm:    0 1px 2px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.25);
+      --shadow:       0 4px 16px rgba(0,0,0,.6), 0 2px 6px rgba(0,0,0,.35);
       --font:         -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     }
 
@@ -119,7 +119,7 @@
       transition: background 0.12s, border-color 0.12s, color 0.12s;
       white-space: nowrap;
     }
-    .btn:hover        { background: var(--blue-pale); border-color: #93c5fd; color: var(--blue); }
+    .btn:hover        { background: var(--blue-pale); border-color: #005e70; color: var(--blue); }
     .btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
     .btn-icon { width: 34px; height: 34px; border-radius: var(--r-sm); font-size: 1rem; }
@@ -146,7 +146,7 @@
       flex-wrap: wrap;
       line-height: 1.4;
     }
-    .now-bar-active { background: var(--green-pale); color: #064e3b; border: 1px solid #6ee7b7; }
+    .now-bar-active { background: var(--green-pale); color: #4dd9b8; border: 1px solid #005e48; }
     .now-bar-idle   { background: var(--surface);    color: var(--text-2); border: 1px solid var(--border); }
 
     .now-dot {
@@ -161,8 +161,8 @@
     .now-bar-idle .now-dot { background: var(--text-3); }
 
     @keyframes pulse-dot {
-      0%, 100% { box-shadow: 0 0 0 3px #a7f3d0; }
-      50%       { box-shadow: 0 0 0 6px #d1fae5; }
+      0%, 100% { box-shadow: 0 0 0 3px rgba(0,201,167,0.3); }
+      50%       { box-shadow: 0 0 0 6px rgba(0,201,167,0.1); }
     }
 
     .now-pool-tag { font-weight: 700; }
@@ -259,8 +259,8 @@
     .cal-pool-col { flex: 1; position: relative; border-left: 1px solid var(--border); min-width: 0; }
 
     .cal-hline { position: absolute; left: 0; right: 0; pointer-events: none; }
-    .cal-hline.full { border-top: 1px solid #edf1f7; }
-    .cal-hline.half { border-top: 1px dashed #f3f6fa;  }
+    .cal-hline.full { border-top: 1px solid rgba(255,255,255,0.05); }
+    .cal-hline.half { border-top: 1px dashed rgba(255,255,255,0.025); }
 
     .cal-slot {
       position: absolute;
@@ -272,11 +272,11 @@
       overflow: hidden;
       cursor: default;
       transition: filter 0.12s, box-shadow 0.12s;
-      box-shadow: 0 1px 3px rgba(0,0,0,.20), 0 1px 2px rgba(0,0,0,.10);
+      box-shadow: 0 2px 6px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.3);
     }
     .cal-slot:hover {
-      filter: brightness(1.1);
-      box-shadow: 0 4px 10px rgba(0,0,0,.25);
+      filter: brightness(1.15);
+      box-shadow: 0 4px 14px rgba(0,0,0,.6);
       z-index: 2;
     }
     .cal-slot .sl-time { font-weight: 700; white-space: nowrap; display: block; }
@@ -323,11 +323,11 @@
       border-radius: 50%;
       flex-shrink: 0;
     }
-    .badge-live        { background: var(--green-pale); color: #065f46; }
+    .badge-live        { background: var(--green-pale); color: #4dd9b8; }
     .badge-live::before        { background: var(--green); }
-    .badge-fallback    { background: var(--amber-pale); color: #78350f; }
+    .badge-fallback    { background: var(--amber-pale); color: #f0b84a; }
     .badge-fallback::before    { background: var(--amber); }
-    .badge-unavailable { background: var(--red-pale);   color: #7f1d1d; }
+    .badge-unavailable { background: var(--red-pale);   color: #e88080; }
     .badge-unavailable::before { background: var(--red); }
 
     /* ─── Cards ─── */
@@ -470,7 +470,7 @@
     var GUTTER_PX  = 46;
     var TOTAL_H    = (HOUR_END - HOUR_START) * HOUR_PX;
 
-    var POOL_COLORS = ["#1d4ed8", "#7c3aed", "#0891b2", "#16a34a"];
+    var POOL_COLORS = ["#1090b8", "#6858e0", "#108880", "#1470cc"];
 
     var currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
@@ -593,42 +593,29 @@
               + esc(pool.name)
               + '</button>';
       });
-      html += '<button class="btn btn-text filter-all-btn" id="btn-filter-all">'
-            + (anyOff ? 'Show all' : 'Hide all')
-            + '</button>';
+      if (anyOff) {
+        html += '<button class="btn btn-text filter-all-btn" id="btn-filter-all">Show all</button>';
+      }
       bar.innerHTML = html;
       bar.hidden = false;
 
       bar.querySelectorAll(".filter-btn").forEach(function (btn) {
         btn.addEventListener("click", function () {
           var name = btn.dataset.filterPool;
-          if (filteredOut[name]) {
-            delete filteredOut[name];
-            btn.setAttribute("aria-pressed", "true");
-          } else {
-            filteredOut[name] = true;
-            btn.setAttribute("aria-pressed", "false");
-          }
-          btn.classList.toggle("off");
-          // Update All/None label without full rebuild
-          var allBtn = document.getElementById("btn-filter-all");
-          if (allBtn) {
-            var stillAnyOff = pools.some(function (p) { return filteredOut[p.name]; });
-            allBtn.textContent = stillAnyOff ? 'Show all' : 'Hide all';
-          }
+          if (filteredOut[name]) { delete filteredOut[name]; } else { filteredOut[name] = true; }
+          buildFilterBar(pools);
           applyFilters();
         });
       });
 
-      document.getElementById("btn-filter-all").addEventListener("click", function () {
-        if (anyOff) {
+      var allBtn = document.getElementById("btn-filter-all");
+      if (allBtn) {
+        allBtn.addEventListener("click", function () {
           filteredOut = {};
-        } else {
-          pools.forEach(function (p) { filteredOut[p.name] = true; });
-        }
-        buildFilterBar(pools);
-        applyFilters();
-      });
+          buildFilterBar(pools);
+          applyFilters();
+        });
+      }
 
       applyFilters();
     }
