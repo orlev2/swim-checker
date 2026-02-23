@@ -2,11 +2,14 @@
 
 Check lane swimming (baanzwemmen) schedules for Amsterdam-area pools — from the terminal or a browser.
 
+**Live app:** https://swim-checker.onrender.com
+
 ## Pools covered
 
 - De Mirandabad
 - Sportplaza Mercator
 - De Meerkamp
+- Zuiderbad
 
 ## Setup
 
