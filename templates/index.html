@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Swimfinder</title>
+  <title>swimchecker amsterdam</title>
   <style>
     /* ─── Design tokens ─── */
     :root {
@@ -81,6 +81,7 @@
       gap: 0.45rem;
     }
     .app-title-icon { font-size: 1.2rem; line-height: 1; }
+    .ams-icon { display: block; flex-shrink: 0; }
     .app-title h1 {
       font-size: 1.05rem;
       font-weight: 700;
@@ -438,8 +439,16 @@
   <header class="app-bar">
     <div class="app-bar-inner">
       <div class="app-title">
-        <span class="app-title-icon" aria-hidden="true">🏊</span>
-        <h1>Swimfinder</h1>
+        <span class="app-title-icon" aria-hidden="true">🥽</span>
+        <svg class="ams-icon" width="11" height="21" viewBox="0 0 11 21" aria-hidden="true">
+          <line x1="1" y1="1"  x2="10" y2="5"  stroke="#C8102E" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="10" y1="1"  x2="1" y2="5"  stroke="#C8102E" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="1" y1="8"  x2="10" y2="12" stroke="#C8102E" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="10" y1="8"  x2="1" y2="12" stroke="#C8102E" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="1" y1="15" x2="10" y2="19" stroke="#C8102E" stroke-width="1.8" stroke-linecap="round"/>
+          <line x1="10" y1="15" x2="1" y2="19" stroke="#C8102E" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        <h1>swimchecker amsterdam</h1>
       </div>
       <nav class="date-nav" aria-label="Navigate by date">
         <button class="btn btn-icon" id="btn-prev" aria-label="Previous day" title="Previous day (←)" aria-keyshortcuts="ArrowLeft">←</button>
