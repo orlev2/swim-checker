@@ -202,7 +202,8 @@
     .filter-btn:hover       { box-shadow: var(--shadow); }
     .filter-btn:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
     .filter-btn .swatch     { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .filter-btn.off         { opacity: 0.3; box-shadow: none; text-decoration: line-through; }
+    .filter-btn.off         { opacity: 0.45; box-shadow: none; text-decoration: line-through; }
+    .filter-all-btn { margin-left: auto; font-size: 0.75rem; height: 28px; padding: 0 0.65rem; border-radius: 99px; }
 
     /* ─── Calendar ─── */
     .cal-wrap {
@@ -246,7 +247,7 @@
     .cal-hour-label {
       position: absolute;
       right: 8px;
-      font-size: 0.61rem;
+      font-size: 0.7rem;
       font-weight: 600;
       color: var(--text-3);
       transform: translateY(-50%);
@@ -266,7 +267,7 @@
       left: 3px; right: 3px;
       border-radius: 6px;
       color: #fff;
-      font-size: 0.67rem;
+      font-size: 0.75rem;
       padding: 4px 6px;
       overflow: hidden;
       cursor: default;
@@ -279,7 +280,7 @@
       z-index: 2;
     }
     .cal-slot .sl-time { font-weight: 700; white-space: nowrap; display: block; }
-    .cal-slot .sl-dur  { opacity: 0.82; font-size: 0.61rem; display: block; margin-top: 1px; }
+    .cal-slot .sl-dur  { opacity: 0.82; font-size: 0.66rem; display: block; margin-top: 1px; }
     .cal-slot.fallback { opacity: 0.65; }
 
     /* Current-time red line */
@@ -308,9 +309,9 @@
       display: inline-flex;
       align-items: center;
       gap: 3px;
-      font-size: 0.6rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 0.13rem 0.42rem;
+      padding: 0.15rem 0.5rem;
       border-radius: 99px;
       text-transform: uppercase;
       letter-spacing: 0.07em;
@@ -318,7 +319,7 @@
     }
     .badge::before {
       content: "";
-      width: 5px; height: 5px;
+      width: 6px; height: 6px;
       border-radius: 50%;
       flex-shrink: 0;
     }
@@ -397,6 +398,28 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .error { text-align: center; color: var(--red); font-size: 0.9rem; padding: 2rem; }
 
+    /* ─── Skeleton loading ─── */
+    .card-skel { border-left-color: var(--border-2) !important; pointer-events: none; }
+    .skel-line {
+      height: 0.8rem;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--border) 25%, var(--surface-2) 50%, var(--border) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.4s ease-in-out infinite;
+    }
+    @keyframes shimmer {
+      0%   { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    /* ─── Focus styles for links ─── */
+    .card-header a:focus-visible,
+    .cal-col-head a:focus-visible {
+      outline: 2px solid var(--blue);
+      outline-offset: 2px;
+      border-radius: 3px;
+    }
+
     /* ─── Responsive ─── */
     @media (max-width: 640px) {
       .app-bar { padding: 0.75rem 1rem; }
@@ -419,10 +442,10 @@
         <h1>Swimfinder</h1>
       </div>
       <nav class="date-nav" aria-label="Navigate by date">
-        <button class="btn btn-icon" id="btn-prev" aria-label="Previous day" title="Previous day">←</button>
+        <button class="btn btn-icon" id="btn-prev" aria-label="Previous day" title="Previous day (←)" aria-keyshortcuts="ArrowLeft">←</button>
         <span id="date-label" aria-live="polite" aria-atomic="true"></span>
-        <button class="btn btn-icon" id="btn-next" aria-label="Next day" title="Next day">→</button>
-        <button class="btn btn-text" id="btn-today">Today</button>
+        <button class="btn btn-icon" id="btn-next" aria-label="Next day" title="Next day (→)" aria-keyshortcuts="ArrowRight">→</button>
+        <button class="btn btn-text" id="btn-today" title="Jump to today (T)" aria-keyshortcuts="t">Today</button>
       </nav>
     </div>
   </header>
@@ -430,7 +453,7 @@
   <main class="main" id="main-content">
     <div id="now-bar" hidden role="status" aria-live="polite"></div>
     <div id="filter-bar" class="filter-bar" hidden role="group" aria-label="Filter by pool"></div>
-    <div id="cards"></div>
+    <div id="cards" role="region" aria-label="Schedule summary"></div>
     <div class="cal-wrap" id="cal-wrap" role="region" aria-label="Lane swimming schedule">
       <div class="loading">
         <div class="spinner" aria-hidden="true"></div>
@@ -557,6 +580,7 @@
     /* ── Filter bar ── */
     function buildFilterBar(pools) {
       var bar = document.getElementById("filter-bar");
+      var anyOff = pools.some(function (p) { return filteredOut[p.name]; });
       var html = '<span class="filter-label">Show:</span>';
       pools.forEach(function (pool, idx) {
         var c   = colorFor(idx);
@@ -569,6 +593,9 @@
               + esc(pool.name)
               + '</button>';
       });
+      html += '<button class="btn btn-text filter-all-btn" id="btn-filter-all">'
+            + (anyOff ? 'Show all' : 'Hide all')
+            + '</button>';
       bar.innerHTML = html;
       bar.hidden = false;
 
@@ -583,8 +610,24 @@
             btn.setAttribute("aria-pressed", "false");
           }
           btn.classList.toggle("off");
+          // Update All/None label without full rebuild
+          var allBtn = document.getElementById("btn-filter-all");
+          if (allBtn) {
+            var stillAnyOff = pools.some(function (p) { return filteredOut[p.name]; });
+            allBtn.textContent = stillAnyOff ? 'Show all' : 'Hide all';
+          }
           applyFilters();
         });
+      });
+
+      document.getElementById("btn-filter-all").addEventListener("click", function () {
+        if (anyOff) {
+          filteredOut = {};
+        } else {
+          pools.forEach(function (p) { filteredOut[p.name] = true; });
+        }
+        buildFilterBar(pools);
+        applyFilters();
       });
 
       applyFilters();
@@ -713,7 +756,16 @@
     function renderLoading() {
       document.getElementById("cal-wrap").innerHTML =
         '<div class="loading"><div class="spinner" aria-hidden="true"></div>Loading schedules…</div>';
-      document.getElementById("cards").innerHTML = "";
+      var skelHtml = "";
+      for (var i = 0; i < 4; i++) {
+        skelHtml += '<div class="card card-skel" aria-hidden="true">'
+          + '<div class="skel-line" style="width:55%;margin-bottom:0.5rem"></div>'
+          + '<div class="skel-line" style="width:40%"></div>'
+          + '<div class="skel-line" style="width:45%"></div>'
+          + '<div class="skel-line" style="width:38%"></div>'
+          + '</div>';
+      }
+      document.getElementById("cards").innerHTML = skelHtml;
       document.getElementById("now-bar").hidden = true;
       document.getElementById("filter-bar").hidden = true;
     }
@@ -755,6 +807,23 @@
     document.getElementById("btn-next").addEventListener("click", function () {
       currentDate = new Date(currentDate.getTime() + 86400000);
       loadSlots();
+    });
+
+    /* ── Keyboard navigation ── */
+    document.addEventListener("keydown", function (e) {
+      if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA" || e.target.isContentEditable) return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key === "ArrowLeft") {
+        currentDate = new Date(currentDate.getTime() - 86400000);
+        loadSlots();
+      } else if (e.key === "ArrowRight") {
+        currentDate = new Date(currentDate.getTime() + 86400000);
+        loadSlots();
+      } else if (e.key === "t" || e.key === "T") {
+        currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+        loadSlots();
+      }
     });
 
     loadSlots();
