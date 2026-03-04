@@ -7,27 +7,27 @@
   <style>
     /* ─── Design tokens ─── */
     :root {
-      --bg:           #050f1c;
-      --surface:      #0f2440;
-      --surface-2:    #152e4e;
-      --border:       #163450;
-      --border-2:     #1f4a6e;
-      --text-1:       #c8e0f0;
-      --text-2:       #6098b8;
-      --text-3:       #2e5a75;
-      --blue:         #00c8e0;
-      --blue-pale:    #012830;
-      --green:        #00c9a7;
-      --green-pale:   #012720;
-      --amber:        #f0a830;
-      --amber-pale:   #271400;
-      --red:          #e06060;
-      --red-pale:     #290808;
+      --bg:           #f0f6fb;
+      --surface:      #ffffff;
+      --surface-2:    #e6f0f8;
+      --border:       #cce0ef;
+      --border-2:     #b0ccdf;
+      --text-1:       #18375a;
+      --text-2:       #3d6f90;
+      --text-3:       #8aaec6;
+      --blue:         #0080a8;
+      --blue-pale:    #dff0f8;
+      --green:        #00a87a;
+      --green-pale:   #d9f5ed;
+      --amber:        #c07800;
+      --amber-pale:   #fdf0d5;
+      --red:          #c43a3a;
+      --red-pale:     #fce8e8;
       --r-lg:         14px;
       --r:            10px;
       --r-sm:         7px;
-      --shadow-sm:    0 1px 2px rgba(0,0,0,.4), 0 1px 3px rgba(0,0,0,.25);
-      --shadow:       0 4px 16px rgba(0,0,0,.6), 0 2px 6px rgba(0,0,0,.35);
+      --shadow-sm:    0 1px 2px rgba(0,60,100,.07), 0 1px 3px rgba(0,60,100,.05);
+      --shadow:       0 4px 16px rgba(0,60,100,.10), 0 2px 6px rgba(0,60,100,.07);
       --font:         -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
     }
 
@@ -147,7 +147,7 @@
       flex-wrap: wrap;
       line-height: 1.4;
     }
-    .now-bar-active { background: var(--green-pale); color: #4dd9b8; border: 1px solid #005e48; }
+    .now-bar-active { background: var(--green-pale); color: #007558; border: 1px solid #99d9c4; }
     .now-bar-idle   { background: var(--surface);    color: var(--text-2); border: 1px solid var(--border); }
 
     .now-dot {
@@ -162,8 +162,8 @@
     .now-bar-idle .now-dot { background: var(--text-3); }
 
     @keyframes pulse-dot {
-      0%, 100% { box-shadow: 0 0 0 3px rgba(0,201,167,0.3); }
-      50%       { box-shadow: 0 0 0 6px rgba(0,201,167,0.1); }
+      0%, 100% { box-shadow: 0 0 0 3px rgba(0,168,122,0.3); }
+      50%       { box-shadow: 0 0 0 6px rgba(0,168,122,0.12); }
     }
 
     .now-pool-tag { font-weight: 700; }
@@ -260,8 +260,8 @@
     .cal-pool-col { flex: 1; position: relative; border-left: 1px solid var(--border); min-width: 0; }
 
     .cal-hline { position: absolute; left: 0; right: 0; pointer-events: none; }
-    .cal-hline.full { border-top: 1px solid rgba(255,255,255,0.05); }
-    .cal-hline.half { border-top: 1px dashed rgba(255,255,255,0.025); }
+    .cal-hline.full { border-top: 1px solid rgba(0,60,100,0.08); }
+    .cal-hline.half { border-top: 1px dashed rgba(0,60,100,0.04); }
 
     .cal-slot {
       position: absolute;
@@ -273,11 +273,11 @@
       overflow: hidden;
       cursor: default;
       transition: filter 0.12s, box-shadow 0.12s;
-      box-shadow: 0 2px 6px rgba(0,0,0,.5), 0 1px 3px rgba(0,0,0,.3);
+      box-shadow: 0 2px 6px rgba(0,60,100,.18), 0 1px 3px rgba(0,60,100,.10);
     }
     .cal-slot:hover {
-      filter: brightness(1.15);
-      box-shadow: 0 4px 14px rgba(0,0,0,.6);
+      filter: brightness(1.1);
+      box-shadow: 0 4px 14px rgba(0,60,100,.28);
       z-index: 2;
     }
     .cal-slot .sl-time { font-weight: 700; white-space: nowrap; display: block; }
@@ -324,11 +324,11 @@
       border-radius: 50%;
       flex-shrink: 0;
     }
-    .badge-live        { background: var(--green-pale); color: #4dd9b8; }
+    .badge-live        { background: var(--green-pale); color: #006e50; }
     .badge-live::before        { background: var(--green); }
-    .badge-fallback    { background: var(--amber-pale); color: #f0b84a; }
+    .badge-fallback    { background: var(--amber-pale); color: #8a5500; }
     .badge-fallback::before    { background: var(--amber); }
-    .badge-unavailable { background: var(--red-pale);   color: #e88080; }
+    .badge-unavailable { background: var(--red-pale);   color: #9c2a2a; }
     .badge-unavailable::before { background: var(--red); }
 
     /* ─── Cards ─── */
@@ -404,7 +404,7 @@
     .skel-line {
       height: 0.8rem;
       border-radius: 4px;
-      background: linear-gradient(90deg, var(--border) 25%, var(--surface-2) 50%, var(--border) 75%);
+      background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 50%, var(--surface-2) 75%);
       background-size: 200% 100%;
       animation: shimmer 1.4s ease-in-out infinite;
     }
@@ -479,7 +479,7 @@
     var GUTTER_PX  = 46;
     var TOTAL_H    = (HOUR_END - HOUR_START) * HOUR_PX;
 
-    var POOL_COLORS = ["#1090b8", "#6858e0", "#108880", "#1470cc"];
+    var POOL_COLORS = ["#0078a0", "#5a46cc", "#007a68", "#0e60b8"];
 
     var currentDate = new Date();
     currentDate.setHours(0, 0, 0, 0);
