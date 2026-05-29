@@ -2,6 +2,8 @@
 
 Check lane swimming (baanzwemmen) schedules for Amsterdam-area pools — from the terminal or a browser.
 
+**Live app:** https://swim-checker-amsterdam.streamlit.app/
+
 ## Pools covered
 
 - De Mirandabad
