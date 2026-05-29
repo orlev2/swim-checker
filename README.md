@@ -43,7 +43,6 @@ The web UI offers three views (toggle in the top-right):
 |---|---|
 | **Cards** | Pool cards with live/fallback/unavailable badge and time-slot chips |
 | **Timeline** | Gantt-style hourly bar chart — one coloured bar per slot per pool |
-| **Map** | Interactive map with pool markers; hover for slot summary |
 
 Use the **← Prev / Today / Next →** buttons or date picker to browse days.
 Use the **pool filter** (multi-select) to show/hide individual pools across all views.
