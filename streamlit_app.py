@@ -5,6 +5,7 @@ from typing import Optional
 
 import altair as alt
 import pandas as pd
+import pydeck as pdk
 import streamlit as st
 
 from pools.base import PoolChecker
@@ -28,6 +29,16 @@ _ALL_POOL_NAMES = [p.name for p in _ALL_POOLS]
 # One color per pool — aquatic palette
 _POOL_COLORS = ["#0080a8", "#2aa5bd", "#00a87a", "#6a55c2", "#e07040", "#c04870"]
 _COLOR_MAP = {p.name: c for p, c in zip(_ALL_POOLS, _POOL_COLORS)}
+
+# Pool coordinates (lat, lon) for the map view
+_POOL_LOCATIONS: dict[str, tuple[float, float]] = {
+    "De Mirandabad":           (52.3392, 4.9311),
+    "Noorderparkbad":          (52.3907, 4.9215),
+    "Sportplaza Mercator":     (52.3730, 4.8537),
+    "De Meerkamp (Amstelveen)":(52.3092, 4.8710),
+    "Zuiderbad":               (52.3573, 4.8932),
+    "Het Marnixbad":           (52.3733, 4.8815),
+}
 
 # ── Design ────────────────────────────────────────────────────────────────────
 
@@ -108,6 +119,11 @@ footer { visibility: hidden; }
   padding: 1rem 1.2rem;
   box-shadow: 0 2px 12px rgba(0,60,100,.07);
 }
+/* ── Map container ───────────────────────────────────────────────────────── */
+.sc-map-wrap {
+  border: 1.5px solid #cce0ef; border-radius: 14px; overflow: hidden;
+  box-shadow: 0 2px 12px rgba(0,60,100,.07);
+}
 .sc-no-data { text-align:center; color:#8aaec6; padding: 2rem 0; font-style:italic; }
 </style>
 """
@@ -183,6 +199,71 @@ def _build_timeline(pool_results: list, d: date, visible: list) -> Optional[alt.
         .properties(height=max(90, len(pool_order) * 56 + 30))
         .configure_view(stroke="#cce0ef")
         .configure_axis(gridColor="#e8f0f7", domainColor="#cce0ef", labelColor="#18375a")
+    )
+
+
+def _build_map(pool_results: list, visible: list) -> Optional[pdk.Deck]:
+    """Build a pydeck map with one marker per visible pool."""
+    rows = []
+    for pool in pool_results:
+        if pool["name"] not in visible:
+            continue
+        loc = _POOL_LOCATIONS.get(pool["name"])
+        if not loc:
+            continue
+        hex_c = _COLOR_MAP.get(pool["name"], "#888888")
+        r, g, b = int(hex_c[1:3], 16), int(hex_c[3:5], 16), int(hex_c[5:7], 16)
+        slot_count = len(pool["slots"])
+        if slot_count:
+            slot_txt = " · ".join(f"{s['start']}–{s['end']}" for s in pool["slots"])
+        else:
+            slot_txt = "No lane swimming today" if pool["source"] != "unavailable" else "Schedule unavailable"
+        rows.append({
+            "name":     pool["name"],
+            "lat":      loc[0],
+            "lon":      loc[1],
+            "color":    [r, g, b, 220],
+            "radius":   160 if slot_count else 90,
+            "slots":    slot_txt,
+            "source":   pool["source"].capitalize(),
+        })
+    if not rows:
+        return None
+
+    layer = pdk.Layer(
+        "ScatterplotLayer",
+        data=pd.DataFrame(rows),
+        get_position=["lon", "lat"],
+        get_radius="radius",
+        get_fill_color="color",
+        get_line_color=[255, 255, 255, 200],
+        line_width_min_pixels=2,
+        pickable=True,
+        stroked=True,
+        auto_highlight=True,
+    )
+    # Center on Amsterdam, zoomed to show all pools including Amstelveen
+    view = pdk.ViewState(latitude=52.360, longitude=4.895, zoom=11.5, pitch=0)
+    return pdk.Deck(
+        layers=[layer],
+        initial_view_state=view,
+        tooltip={
+            "html": (
+                "<b style='font-size:13px'>{name}</b><br/>"
+                "<small style='color:#888'>{source}</small><br/>"
+                "<span style='font-size:12px'>{slots}</span>"
+            ),
+            "style": {
+                "background": "white",
+                "color": "#18375a",
+                "padding": "8px 12px",
+                "border-radius": "8px",
+                "box-shadow": "0 2px 8px rgba(0,0,0,.15)",
+                "max-width": "260px",
+            },
+        },
+        map_provider="carto",
+        map_style="light",
     )
 
 
@@ -286,7 +367,7 @@ with col_filter:
 with col_view:
     st.radio(
         "View",
-        ["Cards", "Timeline"],
+        ["Cards", "Timeline", "Map"],
         key="view_mode",
         label_visibility="collapsed",
         horizontal=False,
@@ -304,7 +385,7 @@ if st.session_state.view_mode == "Cards":
             st.markdown(_pool_card(pool), unsafe_allow_html=True)
 
 # ── Timeline view ─────────────────────────────────────────────────────────────
-else:
+elif st.session_state.view_mode == "Timeline":
     chart = _build_timeline(pool_results, d, visible)
     st.markdown('<div class="sc-timeline-wrap">', unsafe_allow_html=True)
     if chart:
@@ -312,6 +393,19 @@ else:
     else:
         st.markdown(
             '<div class="sc-no-data">No lane swimming slots for the selected pools today.</div>',
+            unsafe_allow_html=True,
+        )
+    st.markdown("</div>", unsafe_allow_html=True)
+
+# ── Map view ──────────────────────────────────────────────────────────────────
+else:
+    deck = _build_map(pool_results, visible)
+    st.markdown('<div class="sc-map-wrap">', unsafe_allow_html=True)
+    if deck:
+        st.pydeck_chart(deck, use_container_width=True, height=480)
+    else:
+        st.markdown(
+            '<div class="sc-no-data">No pools to display on the map.</div>',
             unsafe_allow_html=True,
         )
     st.markdown("</div>", unsafe_allow_html=True)
