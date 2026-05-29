@@ -10,17 +10,25 @@ Usage:
 import argparse
 import sys
 from datetime import date, timedelta
+from typing import List
 
+from pools.base import PoolChecker, Slot
 from pools.mirandabad import MirandabadChecker
 from pools.mercator import MercatorChecker
 from pools.meerkamp import MeerkampChecker
 from pools.zuiderbad import ZuiderbadChecker
+from pools.noorderparkbad import NoorderparkbadChecker
+from pools.marnixbad import MarnixbadChecker
 
-POOLS = [MirandabadChecker(), MercatorChecker(), MeerkampChecker(), ZuiderbadChecker()]
+POOLS = [
+    MirandabadChecker(), MercatorChecker(), MeerkampChecker(),
+    ZuiderbadChecker(), NoorderparkbadChecker(), MarnixbadChecker(),
+]
 BAR = "─" * 50
 
 
 def parse_date(s: str) -> date:
+    """Parse 'today', 'tomorrow' (or Dutch equivalents), or an ISO date string into a date."""
     if s in ("today", "vandaag"):
         return date.today()
     if s in ("tomorrow", "morgen"):
@@ -28,7 +36,8 @@ def parse_date(s: str) -> date:
     return date.fromisoformat(s)
 
 
-def print_result(pool, d: date, slots, live: bool) -> None:
+def print_result(pool: PoolChecker, d: date, slots: List[Slot], live: bool) -> None:
+    """Print a formatted block for one pool's slots to stdout."""
     if live:
         source = "live"
     elif pool.has_fallback:
@@ -52,6 +61,7 @@ def print_result(pool, d: date, slots, live: bool) -> None:
 
 
 def main() -> None:
+    """Entry point: parse CLI arguments, fetch slots, and print results."""
     parser = argparse.ArgumentParser(
         description="Check lane swimming schedules for Amsterdam pools.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
