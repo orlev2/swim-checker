@@ -2,8 +2,6 @@
 
 Check lane swimming (baanzwemmen) schedules for Amsterdam-area pools — from the terminal or a browser.
 
-**Live app:** https://swim-checker.onrender.com
-
 ## Pools covered
 
 - De Mirandabad
@@ -27,13 +25,13 @@ python check.py tomorrow
 python check.py 2026-03-01   # YYYY-MM-DD
 ```
 
-### Web UI
+### Web UI (Streamlit)
 
 ```bash
-python app.py
+streamlit run streamlit_app.py
 ```
 
-Then open [http://127.0.0.1:5000](http://127.0.0.1:5000). Use the ← Prev / Today / Next → buttons to browse days.
+Then open [http://localhost:8501](http://localhost:8501). Use the ← Prev / Today / Next → buttons to browse days.
 
 ## How it works
 

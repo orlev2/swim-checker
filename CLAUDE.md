@@ -15,7 +15,7 @@ python check.py 2026-03-01   # YYYY-MM-DD
 
 **Web UI:**
 ```bash
-python app.py                # serves on http://127.0.0.1:5000
+streamlit run streamlit_app.py   # serves on http://localhost:8501
 ```
 
 ## Setup
@@ -37,16 +37,14 @@ pip install -r requirements.txt
 
 **`check.py`** imports all checkers, calls `pool.get_slots(d)` for each, and prints formatted results.
 
-**`app.py`** is the Flask web UI. `GET /api/slots?date=YYYY-MM-DD` fetches all pools in parallel via `ThreadPoolExecutor(max_workers=3)` and returns JSON with `source` set to `"live"`, `"fallback"`, or `"unavailable"`. `GET /` renders `templates/index.html`.
-
-**`templates/index.html`** is a self-contained single-page UI (no build step, no framework) with inline CSS/JS. It uses `getFullYear/getMonth/getDate` (not `toISOString()`) to build the date string to avoid UTC offset issues for NL users.
+**`streamlit_app.py`** is the Streamlit web UI. It calls the pool checkers directly (no HTTP API layer), fetches all pools in parallel via `ThreadPoolExecutor(max_workers=4)`, and caches results for 5 minutes with `@st.cache_data(ttl=300)`. Results are displayed as two-column pool cards with a live/fallback/unavailable badge.
 
 ## Adding a new pool
 
 1. Create `pools/<poolname>.py` subclassing `PoolChecker`
 2. Set `name`, `url`, and optionally `FALLBACK`
 3. Implement `fetch_live(self, d: date) -> Optional[List[Slot]]` — return `None` on failure (don't raise; base class catches exceptions too)
-4. Add an instance to the `POOLS` list in both `check.py` and `app.py`
+4. Add an instance to the `POOLS` list in both `check.py` and `streamlit_app.py`
 
 ## Notes on scraping
 
