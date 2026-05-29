@@ -10,12 +10,175 @@ from pools.mercator import MercatorChecker
 from pools.mirandabad import MirandabadChecker
 from pools.zuiderbad import ZuiderbadChecker
 
-SOURCE_BADGE = {
-    "live":        "🟢 live",
-    "fallback":    "🟡 fallback",
-    "unavailable": "🔴 unavailable",
+# ── Design ────────────────────────────────────────────────────────────────────
+
+_CSS = """
+<style>
+/* ── Page ────────────────────────────────────────────────────────────────── */
+.stApp { background: #eef5fb; }
+.main .block-container { padding-top: 2rem; max-width: 800px; }
+footer { visibility: hidden; }
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.sc-header {
+  text-align: center;
+  padding-bottom: 0.25rem;
+}
+.sc-header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #18375a;
+  margin: 0 0 0.25rem;
+  letter-spacing: -0.5px;
+}
+.sc-header p {
+  color: #6a9cbd;
+  font-size: 0.95rem;
+  margin: 0 0 1.5rem;
 }
 
+/* ── Nav buttons ─────────────────────────────────────────────────────────── */
+.stButton > button {
+  border-radius: 10px;
+  border: 1.5px solid #cce0ef;
+  background: #ffffff;
+  color: #18375a;
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.45rem 0.75rem;
+  width: 100%;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+.stButton > button:hover {
+  background: #dff0f8;
+  border-color: #0080a8;
+  color: #005f80;
+}
+.stButton > button:active {
+  background: #cce0ef;
+}
+
+/* ── Date input ──────────────────────────────────────────────────────────── */
+.stDateInput > div > div > input {
+  border-radius: 10px;
+  border-color: #cce0ef;
+  text-align: center;
+  font-weight: 500;
+  color: #18375a;
+  background: #ffffff;
+}
+
+/* ── Day label ───────────────────────────────────────────────────────────── */
+.sc-day-label {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #18375a;
+  padding: 0.6rem 0 1rem;
+}
+
+/* ── Pool card ───────────────────────────────────────────────────────────── */
+.sc-card {
+  background: #ffffff;
+  border: 1.5px solid #cce0ef;
+  border-radius: 14px;
+  padding: 1.1rem 1.2rem 1.15rem;
+  box-shadow: 0 2px 12px rgba(0,60,100,.07), 0 1px 3px rgba(0,60,100,.05);
+  margin-bottom: 1rem;
+  min-height: 130px;
+}
+.sc-card-name {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0 0 0.55rem;
+}
+.sc-card-name a {
+  color: #0080a8;
+  text-decoration: none;
+}
+.sc-card-name a:hover { text-decoration: underline; }
+
+/* ── Source badge ────────────────────────────────────────────────────────── */
+.sc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.22rem 0.65rem;
+  border-radius: 20px;
+  margin-bottom: 0.85rem;
+}
+.sc-badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  display: inline-block;
+}
+.sc-live        { background: #d9f5ed; color: #006e48; }
+.sc-live        .sc-badge-dot { background: #00a87a; }
+.sc-fallback    { background: #fdf0d5; color: #8a5800; }
+.sc-fallback    .sc-badge-dot { background: #c07800; }
+.sc-unavailable { background: #fce8e8; color: #9e2828; }
+.sc-unavailable .sc-badge-dot { background: #c43a3a; }
+
+/* ── Time-slot chips ─────────────────────────────────────────────────────── */
+.sc-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.1rem;
+}
+.sc-slot {
+  background: #dff0f8;
+  color: #18375a;
+  border-radius: 8px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.sc-no-slots {
+  color: #8aaec6;
+  font-size: 0.88rem;
+  font-style: italic;
+  padding-top: 0.1rem;
+}
+</style>
+"""
+
+_BADGE_CLASS = {"live": "sc-live", "fallback": "sc-fallback", "unavailable": "sc-unavailable"}
+_BADGE_LABEL = {"live": "Live", "fallback": "Fallback", "unavailable": "Unavailable"}
+
+
+def _pool_card(pool: dict) -> str:
+    source = pool["source"]
+    badge_cls = _BADGE_CLASS[source]
+    badge_txt = _BADGE_LABEL[source]
+
+    if pool["slots"]:
+        chips = "".join(
+            f'<span class="sc-slot">🕐 {s["start"]} – {s["end"]}</span>'
+            for s in pool["slots"]
+        )
+        body = f'<div class="sc-slots">{chips}</div>'
+    elif source == "unavailable":
+        body = '<div class="sc-no-slots">Schedule unavailable</div>'
+    else:
+        body = '<div class="sc-no-slots">No lane swimming today</div>'
+
+    return (
+        f'<div class="sc-card">'
+        f'  <div class="sc-card-name"><a href="{pool["url"]}" target="_blank">{pool["name"]}</a></div>'
+        f'  <span class="sc-badge {badge_cls}"><span class="sc-badge-dot"></span>{badge_txt}</span>'
+        f'  {body}'
+        f'</div>'
+    )
+
+
+# ── Data ──────────────────────────────────────────────────────────────────────
 
 def _fetch_pool(pool: PoolChecker, d: date) -> dict:
     slots, is_live = pool.get_slots(d)
@@ -54,19 +217,27 @@ def fetch_all_pools(d: date) -> list:
     return results
 
 
+# ── App ───────────────────────────────────────────────────────────────────────
+
 st.set_page_config(
     page_title="swimchecker amsterdam",
     page_icon="🏊",
     layout="centered",
 )
+st.markdown(_CSS, unsafe_allow_html=True)
 
 # ── Initialise session state ──────────────────────────────────────────────────
 if "selected_date" not in st.session_state:
     st.session_state.selected_date = date.today()
 
 # ── Header ────────────────────────────────────────────────────────────────────
-st.title("🏊 swimchecker amsterdam")
-st.caption("Lane swimming (baanzwemmen) schedules for Amsterdam pools")
+st.markdown(
+    '<div class="sc-header">'
+    "<h1>🏊 swimchecker amsterdam</h1>"
+    "<p>Lane swimming (baanzwemmen) schedules for Amsterdam pools</p>"
+    "</div>",
+    unsafe_allow_html=True,
+)
 
 # ── Date navigation ───────────────────────────────────────────────────────────
 col_prev, col_today, col_next = st.columns(3)
@@ -81,38 +252,25 @@ with col_next:
         st.session_state.selected_date += timedelta(days=1)
 
 # date_input uses "selected_date" as its key — reads/writes the same session state
-# as the buttons, so no reconciliation needed
-d = st.date_input(
-    "Select date",
-    key="selected_date",
-    label_visibility="collapsed",
-)
+d = st.date_input("Select date", key="selected_date", label_visibility="collapsed")
 
 # ── Day label ─────────────────────────────────────────────────────────────────
 today = date.today()
 if d == today:
-    day_label = f"Today — {d.strftime('%A, %d %b %Y')}"
+    day_label = f"Today &mdash; {d.strftime('%A, %d %b %Y')}"
 elif d == today + timedelta(days=1):
-    day_label = f"Tomorrow — {d.strftime('%A, %d %b %Y')}"
+    day_label = f"Tomorrow &mdash; {d.strftime('%A, %d %b %Y')}"
 else:
     day_label = d.strftime("%A, %d %b %Y")
 
-st.subheader(day_label)
-st.divider()
+st.markdown(f'<div class="sc-day-label">{day_label}</div>', unsafe_allow_html=True)
 
 # ── Fetch & display ───────────────────────────────────────────────────────────
 with st.spinner("Fetching schedules…"):
     pool_results = fetch_all_pools(d)
 
-cols = st.columns(2)
+col_left, col_right = st.columns(2)
 for i, pool in enumerate(pool_results):
-    with cols[i % 2]:
-        source = pool["source"]
-        with st.container(border=True):
-            st.markdown(f"**[{pool['name']}]({pool['url']})**")
-            st.caption(SOURCE_BADGE[source])
-            if pool["slots"]:
-                for slot in pool["slots"]:
-                    st.write(f"🕐 {slot['start']} – {slot['end']}")
-            else:
-                st.write("_No lane swimming today_" if source != "unavailable" else "_Schedule unavailable_")
+    col = col_left if i % 2 == 0 else col_right
+    with col:
+        st.markdown(_pool_card(pool), unsafe_allow_html=True)
